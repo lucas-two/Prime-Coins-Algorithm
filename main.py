@@ -1,10 +1,7 @@
 """
-Prime-Coin Problem v0.1 12/04/19
+Prime-Coin Problem v0.1A 12/04/19
 
 GOALS:
-- Implement a checker to see if duplicate coin sets are
- being used e.g. (2, 3) and (3, 2) are the same.
-
 - Implement a way to calculate a set of prime numbers
 for our coins. We are currently doing this statically.
 
@@ -26,7 +23,7 @@ def prime_coins(amount, coins):
     :return: A list of solutions
     """
     solutions = []
-    visited = []
+    visited = set()
     queue = []
 
     # Append initial nodes to the queue
@@ -36,7 +33,6 @@ def prime_coins(amount, coins):
     # Do this while we have elements in the queue
     while queue:
         node = queue.pop(0)  # Take off the first node
-        visited.append(node)  # Add it to the visited queue
 
         # Calculate the total of your current node.
         current_amount = calc_total(node)
@@ -51,7 +47,10 @@ def prime_coins(amount, coins):
             for coin in coins:
                 child = node[:]
                 child.append(coin)
-                queue.append(child)
+                child.sort()  # Using a timsort of O(nlogn) complexity.
+                if tuple(child) not in visited:
+                    visited.add(tuple(child))
+                    queue.append(child)
 
     return solutions
 
@@ -69,10 +68,10 @@ def calc_total(node):
 
 
 amount_test = 5
-coins_test = [1, 2, 3, 5] # NOTE: 1 is included as well as gold coin (5)
+coins_test = [1, 2, 3, 5]
 
 start_time = time.time()
 solution = prime_coins(amount_test, coins_test)
 end_time = time.time()
 
-print("%s solutions found in %.6f secs" % (len(solution), end_time - start_time))
+print("%s solutions found in %.5f secs" % (len(solution), end_time - start_time))
