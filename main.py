@@ -2,16 +2,17 @@
 Prime-Coin Problem v0.5 12/04/19
 
 GOALS:
- - Let our program accept an input.txt file as input.
- - Get the program running from the command line.
  - Make our function behave recursively.
+ - Investigate ways to prune the algorithm (?)
 """
 
 import time
 import math
+import os
+import sys
 
 
-def prime_coins(amount, coins, coins_lower = 0, coins_upper = 0):
+def prime_coins(amount, coins, coins_lower, coins_upper):
     """
     Using BFS, performs backtracking to find combinations of
     coins to equal a certain amount.
@@ -42,7 +43,7 @@ def prime_coins(amount, coins, coins_lower = 0, coins_upper = 0):
             # We have the correct amount and is between the coin range
             if current_amount == amount and coins_lower <= coin_count <= coins_upper:
                 solutions.append(node)
-                print("SOLUTION: %s" % node)
+                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than the amount and below max coin limit
             elif current_amount < amount and coin_count <= coins_upper:
@@ -59,7 +60,7 @@ def prime_coins(amount, coins, coins_lower = 0, coins_upper = 0):
             # We have a correct amount and is equal to the coin limit
             if current_amount == amount and coin_count == coins_lower:
                 solutions.append(node)
-                print("SOLUTION: %s" % node)
+                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than amount and the coin limit
             elif current_amount < amount and coin_count <= coins_lower:
@@ -76,7 +77,7 @@ def prime_coins(amount, coins, coins_lower = 0, coins_upper = 0):
             # We have a correct amount
             if current_amount == amount:
                 solutions.append(node)
-                print("SOLUTION: %s" % node)
+                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than the amount
             elif current_amount < amount:
@@ -148,13 +149,52 @@ def create_coins(amount):
     return available_coins
 
 
-my_amount = 8
-lwr_coins = 2
-upr_coins = 5
+abs_location = os.path.abspath(sys.argv[1])
 
-start_time = time.time()
-solution = prime_coins(my_amount, create_coins(my_amount), lwr_coins, upr_coins)
-end_time = time.time()
+try:
+    input_f = open(abs_location, "r")
 
-print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
+except FileNotFoundError:
+    print("Error: It appears that the input text file location (absolute location) was incorrect.")
+    sys.exit(1)
+
+for line in input_f:
+    arguments = line.split()
+    argument_size = len(arguments)
+
+    if argument_size == 1:
+        my_amount = int(arguments[0])
+        lower_limit = 0
+        upper_limit = 0
+
+    elif argument_size == 2:
+        my_amount = int(arguments[0])
+        lower_limit = int(arguments[1])
+        upper_limit = 0
+
+    elif argument_size == 3:
+        my_amount = int(arguments[0])
+        lower_limit = int(arguments[1])
+        upper_limit = int(arguments[2])
+
+    else:
+        print("Error, invalid input arguments")
+        break
+
+    # Run the algorithm
+    start_time = time.time()
+    solution = prime_coins(my_amount, create_coins(my_amount), lower_limit, upper_limit)
+    end_time = time.time()
+
+    print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
+
+    # Output solutions
+    output_f = open("output.txt", "a")
+    output_f.write("%s\n" % len(solution))
+    output_f.close()
+
+input_f.close()
+
+
+
 
