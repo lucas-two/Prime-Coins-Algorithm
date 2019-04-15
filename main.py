@@ -2,9 +2,6 @@
 Prime-Coin Problem v0.1A 12/04/19
 
 GOALS:
-- Implement a way to calculate a set of prime numbers
-for our coins. We are currently doing this statically.
-
 - Implement a maximum/range of coins we want to be used
  for a given amount.
 
@@ -12,6 +9,7 @@ for our coins. We are currently doing this statically.
 """
 
 import time
+import math
 
 
 def prime_coins(amount, coins):
@@ -67,11 +65,57 @@ def calc_total(node):
     return total
 
 
-amount_test = 5
-coins_test = [1, 2, 3, 5]
+def prime(n):
+    """
+    Checks if a given number is prime or not
+    :param n: Number to check
+    :return: True or False
+    """
+    # 1 is not prime
+    if n == 1:
+        return False
+
+    # 2 and 3 are prime.
+    if n == 2 or n == 3:
+        return True
+
+    # NOTE: We set the range to +2 so that the lower limit is never higher than it.
+    # Using sqrt, we can avoid checking multiple factors. e.g. if n = 100, checking to i = 10 is enough.
+    limit = 2 + round(math.sqrt(n))
+
+    # Check if n is divisible by any other number (hence will not be prime)
+    for i in range(2, limit):
+        if n % i == 0:
+            return False
+    return True
+
+
+def create_coins(amount):
+    """
+    Creates the available coins we can use for a given amount
+    :param amount: The amount we are given
+    :return: A list of coins we can use
+    """
+    available_coins = []
+    available_coins.append(1)  # Include 1 as a coin
+
+    # Check and append prime numbers
+    for i in range(1, amount):
+        if prime(i):
+            available_coins.append(i)
+
+    # Check if our gold coin was already added (was a prime).
+    if available_coins[len(available_coins) - 1] != amount:
+        available_coins.append(amount)
+
+    return available_coins
+
+
+my_amount = 5
 
 start_time = time.time()
-solution = prime_coins(amount_test, coins_test)
+solution = prime_coins(my_amount, create_coins(my_amount))
 end_time = time.time()
 
-print("%s solutions found in %.5f secs" % (len(solution), end_time - start_time))
+print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
+
