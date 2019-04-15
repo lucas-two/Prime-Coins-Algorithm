@@ -12,8 +12,8 @@ Input types:
 ## Instructions:
 These intructions are for Windows only
 
-1.) Open the command prompt
-2.) Enter the directory of where the .py file is located
-3.) type "python s5132841_Pay_in_Coins.py <C:\....\input.txt ABSOLUTE LOCATION OF INPUT FILE>
+1. ) Open the command prompt
+2. ) Enter the directory of where the .py file is located
+3. ) type "python s5132841_Pay_in_Coins.py <C:\....\input.txt ABSOLUTE LOCATION OF INPUT FILE>
  
 An output file will then be created in the same directory as the .py file.
