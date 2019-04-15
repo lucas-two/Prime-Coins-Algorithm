@@ -1,5 +1,5 @@
 """
-Prime-Coin Problem v0.5 12/04/19
+Prime-Coin Problem v0.75 15/04/19
 
 GOALS:
  - Make our function behave recursively.
@@ -149,52 +149,57 @@ def create_coins(amount):
     return available_coins
 
 
-abs_location = os.path.abspath(sys.argv[1])
+def main():
+    """
+    Main of the program.
+    """
+    abs_location = os.path.abspath(sys.argv[1]) # Location of input file
 
-try:
-    input_f = open(abs_location, "r")
+    try:
+        input_f = open(abs_location, "r")
 
-except FileNotFoundError:
-    print("Error: It appears that the input text file location (absolute location) was incorrect.")
-    sys.exit(1)
+    except FileNotFoundError:
+        print("Error: It appears that the input text file location (absolute location) was incorrect.")
+        sys.exit(1)
 
-for line in input_f:
-    arguments = line.split()
-    argument_size = len(arguments)
+    # Check which parameters are being used
+    for line in input_f:
+        arguments = line.split()
+        argument_size = len(arguments)
 
-    if argument_size == 1:
-        my_amount = int(arguments[0])
-        lower_limit = 0
-        upper_limit = 0
+        if argument_size == 1:
+            my_amount = int(arguments[0])
+            lower_limit = 0
+            upper_limit = 0
 
-    elif argument_size == 2:
-        my_amount = int(arguments[0])
-        lower_limit = int(arguments[1])
-        upper_limit = 0
+        elif argument_size == 2:
+            my_amount = int(arguments[0])
+            lower_limit = int(arguments[1])
+            upper_limit = 0
 
-    elif argument_size == 3:
-        my_amount = int(arguments[0])
-        lower_limit = int(arguments[1])
-        upper_limit = int(arguments[2])
+        elif argument_size == 3:
+            my_amount = int(arguments[0])
+            lower_limit = int(arguments[1])
+            upper_limit = int(arguments[2])
 
-    else:
-        print("Error, invalid input arguments")
-        break
+        else:
+            print("Error, invalid input arguments")
+            break
 
-    # Run the algorithm
-    start_time = time.time()
-    solution = prime_coins(my_amount, create_coins(my_amount), lower_limit, upper_limit)
-    end_time = time.time()
+        # Run the algorithm
+        start_time = time.time()
+        solution = prime_coins(my_amount, create_coins(my_amount), lower_limit, upper_limit)
+        end_time = time.time()
 
-    print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
+        print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
 
-    # Output solutions
-    output_f = open("output.txt", "a")
-    output_f.write("%s\n" % len(solution))
-    output_f.close()
+        # Output solutions
+        output_f = open("output.txt", "a")
+        output_f.write("%s\n" % len(solution))
+        output_f.close()
 
-input_f.close()
-
-
+    input_f.close()
 
 
+if __name__ == "__main__":
+    main()
