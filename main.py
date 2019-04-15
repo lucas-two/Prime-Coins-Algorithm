@@ -1,10 +1,9 @@
 """
-Prime-Coin Problem v0.1A 12/04/19
+Prime-Coin Problem v0.5 12/04/19
 
 GOALS:
-- Implement a maximum/range of coins we want to be used
- for a given amount.
-
+ - Let our program accept an input.txt file as input.
+ - Get the program running from the command line.
  - Make our function behave recursively.
 """
 
@@ -12,7 +11,7 @@ import time
 import math
 
 
-def prime_coins(amount, coins):
+def prime_coins(amount, coins, coins_lower = 0, coins_upper = 0):
     """
     Using BFS, performs backtracking to find combinations of
     coins to equal a certain amount.
@@ -35,21 +34,59 @@ def prime_coins(amount, coins):
         # Calculate the total of your current node.
         current_amount = calc_total(node)
 
-        # If we've met the exact amount, return this as a solution
-        if current_amount == amount:
-            solutions.append(node)
-            print("SOLUTION: %s" % node)
+        # Amount of coins we have in the list
+        coin_count = len(node)
 
-        # Otherwise, look at the node's children (ONLY if it's total is less than the current amount)
-        elif current_amount < amount:
-            for coin in coins:
-                child = node[:]
-                child.append(coin)
-                child.sort()  # Using a timsort of O(nlogn) complexity.
-                if tuple(child) not in visited:
-                    visited.add(tuple(child))
-                    queue.append(child)
+        # Do we have an upper and lower coins parameter?
+        if coins_lower != 0 and coins_upper != 0:
+            # We have the correct amount and is between the coin range
+            if current_amount == amount and coins_lower <= coin_count <= coins_upper:
+                solutions.append(node)
+                print("SOLUTION: %s" % node)
 
+            # Add more children while we're less than the amount and below max coin limit
+            elif current_amount < amount and coin_count <= coins_upper:
+                for coin in coins:
+                    child = node[:]
+                    child.append(coin)
+                    child.sort()  # Using a timsort of O(nlogn) complexity.
+                    if tuple(child) not in visited:
+                        visited.add(tuple(child))
+                        queue.append(child)
+
+        # Do we have an exact (lower) parameter?
+        elif coins_lower != 0:
+            # We have a correct amount and is equal to the coin limit
+            if current_amount == amount and coin_count == coins_lower:
+                solutions.append(node)
+                print("SOLUTION: %s" % node)
+
+            # Add more children while we're less than amount and the coin limit
+            elif current_amount < amount and coin_count <= coins_lower:
+                for coin in coins:
+                    child = node[:]
+                    child.append(coin)
+                    child.sort()  # Using a timsort of O(nlogn) complexity.
+                    if tuple(child) not in visited:
+                        visited.add(tuple(child))
+                        queue.append(child)
+
+        # Do we have no range parameter?
+        else:
+            # We have a correct amount
+            if current_amount == amount:
+                solutions.append(node)
+                print("SOLUTION: %s" % node)
+
+            # Add more children while we're less than the amount
+            elif current_amount < amount:
+                for coin in coins:
+                    child = node[:]
+                    child.append(coin)
+                    child.sort()  # Using a timsort of O(nlogn) complexity.
+                    if tuple(child) not in visited:
+                        visited.add(tuple(child))
+                        queue.append(child)
     return solutions
 
 
@@ -111,10 +148,12 @@ def create_coins(amount):
     return available_coins
 
 
-my_amount = 5
+my_amount = 8
+lwr_coins = 2
+upr_coins = 5
 
 start_time = time.time()
-solution = prime_coins(my_amount, create_coins(my_amount))
+solution = prime_coins(my_amount, create_coins(my_amount), lwr_coins, upr_coins)
 end_time = time.time()
 
 print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
