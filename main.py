@@ -2,7 +2,6 @@
 Prime-Coin Problem v0.8 16/04/19
 
 GOALS:
- - Make our function behave recursively.
  - Investigate ways to prune the algorithm (?)
 """
 
@@ -91,33 +90,37 @@ def prime_coins(amount, coins, coins_lower, coins_upper):
     return solutions
 
 
-def prime_coins_rec(amount, current_coin):
+def prime_coins_rec(amount, current_coin, coins_used, coins_lower, coins_upper, range_used):
     """
-    Recursive implementation of the prime-coin problem
-    (in simplified state without ranges).
-    :param amount: The current amount to pay in coins.
-    :param current_coin: Starting coin in the array we are using
-    :return: Number of solutions.
+    Recursive implementation of the prime coin change problem.
+    :param amount: Amount to pay in coins
+    :param current_coin: Which coin should we start from? (avoids combination duplicates)
+    :param coins_used: How many coins have been used?
+    :param coins_lower: Lower limit or exact amount of coins to be used.
+    :param coins_upper: Upper limit of coins to be used.
+    :param range_used: Are we using range parameters? (above two params)
+    :return: An integer sum of no. of solutions found.
     """
+    # The amount has reached 0 (within range), hence solution.
+    if amount == 0 and range_used is True and ((coins_lower <= coins_used <= coins_upper) or coins_used == coins_lower):
+        return 1
 
-    # The amount has reached 0, hence is a solution.
-    if amount == 0:
+    # The amount has reached 0 (without range), hence solution.
+    elif amount == 0 and range_used is False:
         return 1
 
     # The amount was over exceeded, hence not a solution.
     elif amount < 0:
         return 0
 
-    else:
-        solutions = 0  # Solutions we have found where amount == 0
+    # Otherwise, If we haven't reached a complete state:
+    solutions = 0  # Solutions we have found where amount == 0
 
-        # Recursively loop though coin combinations to find solutions
-        # This essentially acts like a pruned DFS (Depth First Search).
-        # NOTE: We use a current coin to prune and avoid duplicate
-        # combination solution states.
-        for coin in range(current_coin, len(my_coins)):
-            solutions += (prime_coins_rec(amount - my_coins[coin], current_coin))
-            current_coin += 1  # Start from the next coin (to avoid duplicates)
+    # Recursively loop though coin combinations to find solutions
+    # This essentially acts like a pruned DFS (Depth First Search).
+    for coin in range(current_coin, len(my_coins)):
+        solutions += (prime_coins_rec(amount - my_coins[coin], current_coin, coins_used + 1, coins_lower, coins_upper, range_used))
+        current_coin += 1  # Start from the next coin (to avoid duplicates)
 
     return solutions
 
@@ -180,68 +183,66 @@ def create_coins(amount):
     return available_coins
 
 
-# def main():
-#     """
-#     Main of the program.
-#     """
-#     abs_location = os.path.abspath(sys.argv[1]) # Location of input file
-#
-#     try:
-#         input_f = open(abs_location, "r")
-#
-#     except FileNotFoundError:
-#         print("Error: It appears that the input text file location (absolute location) was incorrect.")
-#         sys.exit(1)
-#
-#     # Check which parameters are being used
-#     for line in input_f:
-#         arguments = line.split()
-#         argument_size = len(arguments)
-#
-#         if argument_size == 1:
-#             my_amount = int(arguments[0])
-#             lower_limit = 0
-#             upper_limit = 0
-#
-#         elif argument_size == 2:
-#             my_amount = int(arguments[0])
-#             lower_limit = int(arguments[1])
-#             upper_limit = 0
-#
-#         elif argument_size == 3:
-#             my_amount = int(arguments[0])
-#             lower_limit = int(arguments[1])
-#             upper_limit = int(arguments[2])
-#
-#         else:
-#             print("Error, invalid input arguments")
-#             break
-#
-#         # Run the algorithm
-#         start_time = time.time()
-#         solution = prime_coins(my_amount, create_coins(my_amount), lower_limit, upper_limit)
-#         end_time = time.time()
-#
-#         print("%s solutions found in %0.5f secs" % (len(solution), end_time - start_time))
-#
-#         # Output solutions
-#         output_f = open("output.txt", "a")
-#         output_f.write("%s\n" % len(solution))
-#         output_f.close()
-#
-#     input_f.close()
-
 def main():
-    my_amount = 5
+    """
+    Main of the program.
+    """
+    # abs_location = os.path.abspath(sys.argv[1])  # Location of input file
+    abs_location = "input.txt"  # TEMP
+    try:
+        input_f = open(abs_location, "r")
 
-    global my_coins
-    my_coins = create_coins(my_amount)
-    print(my_coins)
-    start_time = time.time()
-    solution = prime_coins_rec(my_amount, 0)
-    end_time = time.time()
+    except FileNotFoundError:
+        print("Error: It appears that the input text file location (absolute location) was incorrect.")
+        sys.exit(1)
 
-    print(solution)
+    # Check which parameters are being used
+    for line in input_f:
+        arguments = line.split()
+        argument_size = len(arguments)
+
+        if argument_size == 1:
+            my_amount = int(arguments[0])
+            lower_limit = 0
+            upper_limit = 0
+
+        elif argument_size == 2:
+            my_amount = int(arguments[0])
+            lower_limit = int(arguments[1])
+            upper_limit = 0
+
+        elif argument_size == 3:
+            my_amount = int(arguments[0])
+            lower_limit = int(arguments[1])
+            upper_limit = int(arguments[2])
+
+        else:
+            print("Error, invalid input arguments")
+            break
+
+        range_used = False
+        if lower_limit != 0 or upper_limit != 0:
+            range_used = True
+
+        global my_coins
+        my_coins = create_coins(my_amount)
+
+        # Execute algorithm
+        start_time = time.time()
+        solution_count = prime_coins_rec(my_amount, 0, 0, lower_limit, upper_limit, range_used)
+        end_time = time.time()
+
+        print("a: %s lower: %s upper: %s" % (my_amount, lower_limit, upper_limit))
+        print("%s solutions found in %0.5f secs" % (solution_count, end_time - start_time))
+        print("\n")
+
+        # Output solutions
+        output_f = open("output.txt", "a")
+        output_f.write("%s\n" % solution_count)
+        output_f.close()
+
+    input_f.close()
+
 
 if __name__ == "__main__":
     main()
