@@ -1,8 +1,7 @@
 """
-Prime-Coin Problem v0.8 16/04/19
-
-GOALS:
- - Investigate ways to prune the algorithm (?)
+Prime-Coin Change Problem (ver 1.0)
+Author: Lucas Geurtjens (s5132841)
+17/04/19
 """
 
 import time
@@ -11,10 +10,62 @@ import os
 import sys
 
 
-def prime_coins(amount, coins, coins_lower, coins_upper):
+def prime_coins_rec(amount, current_coin, coins_used, coins_lower, coins_upper, param_type):
     """
-    Using BFS, performs backtracking to find combinations of
-    coins to equal a certain amount.
+    Recursive implementation of the prime coin change problem (using DFS)
+    :param amount: Amount to pay in coins
+    :param current_coin: Which coin should we start from? (avoids combination duplicates)
+    :param coins_used: How many coins have been used?
+    :param coins_lower: Lower limit or exact amount of coins to be used.
+    :param coins_upper: Upper limit of coins to be used.
+    :param param_type: Type of parameters being used (1, 2 or 3 inputs)
+    :return: An integer sum of no. of solutions found.
+    """
+
+    # Find any amount of coins to reach the amount
+    if param_type == 1:
+        if amount == 0:  # Amount reached 0, hence a solution.
+            return 1
+
+        elif amount < 0:  # Amount is less than 0, hence not a solution
+            return 0
+
+    # Find an exact amount of coins to reach the amount
+    elif param_type == 2:
+        # Amount reached 0 and has correct number of coins, hence solution.
+        if amount == 0 and coins_used == coins_lower:
+            return 1
+
+        # Amount is below 0 or has used too many coins, hence not solution.
+        elif amount < 0 or coins_used > coins_lower:
+            return 0
+
+    # Find an amount of coins within a range to reach the amount
+    elif param_type == 3:
+        # Amount reached 0 and has correct number of coins, hence solution.
+        if amount == 0 and coins_lower <= coins_used <= coins_upper:
+            return 1
+
+        # Amount is below 0 or has used used coins above the range, hence not solution.
+        elif amount < 0 or coins_used > coins_upper:
+            return 0
+
+    # Otherwise, If we haven't reached a base case
+    solutions = 0  # Solutions we have found where amount == 0
+
+    # Recursively loop though coin combinations to find solutions
+    # This essentially acts like a pruned DFS (Depth First Search).
+    for coin in range(current_coin, len(my_coins)):
+        solutions += (prime_coins_rec(amount - my_coins[coin], current_coin, coins_used + 1, coins_lower, coins_upper, param_type))
+        current_coin += 1  # Start from the next coin (to avoid duplicates)
+
+    return solutions
+
+
+def prime_coins_dyn(amount, coins, coins_lower, coins_upper):
+    """
+    Dynamic implementation of coin change problem (using BFS)
+    NOTE: This implementation is poorly made and is not efficient.
     :param amount: A given amount we will find coins to equal.
     :param coins: Our selection of coins to use
     :return: A list of solutions
@@ -42,7 +93,6 @@ def prime_coins(amount, coins, coins_lower, coins_upper):
             # We have the correct amount and is between the coin range
             if current_amount == amount and coins_lower <= coin_count <= coins_upper:
                 solutions.append(node)
-                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than the amount and below max coin limit
             elif current_amount < amount and coin_count <= coins_upper:
@@ -59,7 +109,6 @@ def prime_coins(amount, coins, coins_lower, coins_upper):
             # We have a correct amount and is equal to the coin limit
             if current_amount == amount and coin_count == coins_lower:
                 solutions.append(node)
-                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than amount and the coin limit
             elif current_amount < amount and coin_count <= coins_lower:
@@ -76,7 +125,6 @@ def prime_coins(amount, coins, coins_lower, coins_upper):
             # We have a correct amount
             if current_amount == amount:
                 solutions.append(node)
-                #print("SOLUTION: %s" % node)
 
             # Add more children while we're less than the amount
             elif current_amount < amount:
@@ -87,41 +135,6 @@ def prime_coins(amount, coins, coins_lower, coins_upper):
                     if tuple(child) not in visited:
                         visited.add(tuple(child))
                         queue.append(child)
-    return solutions
-
-
-def prime_coins_rec(amount, current_coin, coins_used, coins_lower, coins_upper, range_used):
-    """
-    Recursive implementation of the prime coin change problem.
-    :param amount: Amount to pay in coins
-    :param current_coin: Which coin should we start from? (avoids combination duplicates)
-    :param coins_used: How many coins have been used?
-    :param coins_lower: Lower limit or exact amount of coins to be used.
-    :param coins_upper: Upper limit of coins to be used.
-    :param range_used: Are we using range parameters? (above two params)
-    :return: An integer sum of no. of solutions found.
-    """
-    # The amount has reached 0 (within range), hence solution.
-    if amount == 0 and range_used is True and ((coins_lower <= coins_used <= coins_upper) or coins_used == coins_lower):
-        return 1
-
-    # The amount has reached 0 (without range), hence solution.
-    elif amount == 0 and range_used is False:
-        return 1
-
-    # The amount was over exceeded, hence not a solution.
-    elif amount < 0:
-        return 0
-
-    # Otherwise, If we haven't reached a complete state:
-    solutions = 0  # Solutions we have found where amount == 0
-
-    # Recursively loop though coin combinations to find solutions
-    # This essentially acts like a pruned DFS (Depth First Search).
-    for coin in range(current_coin, len(my_coins)):
-        solutions += (prime_coins_rec(amount - my_coins[coin], current_coin, coins_used + 1, coins_lower, coins_upper, range_used))
-        current_coin += 1  # Start from the next coin (to avoid duplicates)
-
     return solutions
 
 
@@ -205,36 +218,33 @@ def main():
             my_amount = int(arguments[0])
             lower_limit = 0
             upper_limit = 0
+            my_param = 1
 
         elif argument_size == 2:
             my_amount = int(arguments[0])
             lower_limit = int(arguments[1])
             upper_limit = 0
+            my_param = 2
 
         elif argument_size == 3:
             my_amount = int(arguments[0])
             lower_limit = int(arguments[1])
             upper_limit = int(arguments[2])
+            my_param = 3
 
         else:
             print("Error, invalid input arguments")
             break
-
-        range_used = False
-        if lower_limit != 0 or upper_limit != 0:
-            range_used = True
 
         global my_coins
         my_coins = create_coins(my_amount)
 
         # Execute algorithm
         start_time = time.time()
-        solution_count = prime_coins_rec(my_amount, 0, 0, lower_limit, upper_limit, range_used)
+        solution_count = prime_coins_rec(my_amount, 0, 0, lower_limit, upper_limit, my_param)
         end_time = time.time()
 
-        print("a: %s lower: %s upper: %s" % (my_amount, lower_limit, upper_limit))
-        print("%s solutions found in %0.5f secs" % (solution_count, end_time - start_time))
-        print("\n")
+        print("(%s %s %s) %s solutions found in %0.5f secs" % (my_amount, lower_limit, upper_limit, solution_count, end_time - start_time))
 
         # Output solutions
         output_f = open("output.txt", "a")
