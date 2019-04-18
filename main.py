@@ -1,7 +1,7 @@
 """
 Prime-Coin Change Problem (ver 1.0)
 Author: Lucas Geurtjens (s5132841)
-17/04/19
+18/04/19
 """
 
 import time
@@ -64,10 +64,12 @@ def prime_coins_rec(amount, current_coin, coins_used, coins_lower, coins_upper, 
 
 def prime_coins_dyn(amount, coins, coins_lower, coins_upper):
     """
+    NOTE: Function is not used (implementation is poorly made and not efficient).
     Dynamic implementation of coin change problem (using BFS)
-    NOTE: This implementation is poorly made and is not efficient.
-    :param amount: A given amount we will find coins to equal.
+    :param amount: A given amount we will find coins to equal
     :param coins: Our selection of coins to use
+    :param coins_lower: Lower limit or exact amount of coins
+    :param coins_upper: Upper limit of coins to be used
     :return: A list of solutions
     """
     solutions = []
@@ -140,6 +142,7 @@ def prime_coins_dyn(amount, coins, coins_lower, coins_upper):
 
 def calc_total(node):
     """
+    NOTE: Function is not used (from the dynamic implementation).
     Calculates the total cost of a given node.
     :param node: Our current coins we have (node)
     :return: The sum total of all coins it's coins
@@ -200,14 +203,19 @@ def main():
     """
     Main of the program.
     """
-    # abs_location = os.path.abspath(sys.argv[1])  # Location of input file
-    abs_location = "input.txt"  # TEMP
+    try:
+        abs_location = os.path.abspath(sys.argv[1])  # Location of input file
+
+    except IndexError:
+        print("Error, program must be run from the commandline with arguments.")
+        sys.exit(-1)
+
     try:
         input_f = open(abs_location, "r")
 
     except FileNotFoundError:
         print("Error: It appears that the input text file location (absolute location) was incorrect.")
-        sys.exit(1)
+        sys.exit(-1)
 
     # Check which parameters are being used
     for line in input_f:
